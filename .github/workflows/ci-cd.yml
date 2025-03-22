@@ -1,0 +1,67 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Permet de déclencher manuellement le workflow
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Étape 1 : Checkout du code depuis le repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Étape 2 : Configuration de Docker Buildx pour permettre le build des images
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Étape 3 : Supprimer l'ancien contenu du projet sur le VPS
+      - name: Clear previous build files on VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            echo "Suppression des anciens fichiers..."
+            rm -rf /home/deploy-cnam_projet/cnam_projet/*  # Assure de vider le répertoire sans le supprimer
+            echo "Ancien contenu supprimé."
+
+      # Étape 4 : Copier uniquement les fichiers nécessaires sur le VPS
+      - name: Copy Build to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          source: "."  # Prendre tout depuis le répertoire courant
+          target: "/home/deploy-cnam_projet/cnam_projet"  # Copier dans le répertoire cible sur le VPS
+          strip_components: 1  # Retirer la structure des dossiers du répertoire racine
+
+      # Étape 5 : Déployer les conteneurs avec Docker Compose
+      - name: Deploy containers on VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            echo "Vérification de Docker..."
+            if ! systemctl is-active --quiet docker; then
+              echo "Docker n'est pas actif. Tentative de démarrage..."
+              sudo systemctl start docker
+            fi
+            # Aller dans le répertoire du projet
+            cd /home/deploy-cnam_projet/cnam_projet
+            echo "${{secrets.ENV}}" > .env
+            echo "Lancement des conteneurs..."
+            docker-compose down  # Arrêter et supprimer les conteneurs existants
+            docker-compose up -d --build  # Démarrer les conteneurs en mode détaché avec rebuild des images
+            echo "Déploiement terminé avec succès !"

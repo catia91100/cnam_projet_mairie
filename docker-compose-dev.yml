@@ -1,0 +1,29 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app # Monte le répertoire local ./backend dans le conteneur à /app
+      - ../../bd:/app/bd # Monte le répertoire local ../../bd dans le conteneur à /app/bd
+    networks:
+      - frontend-backend-network
+
+  frontend:
+    depends_on:
+      - backend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app # Monte le répertoire local ./frontend dans le conteneur à /app
+    networks:
+      - frontend-backend-network
+
+networks:
+  frontend-backend-network:
+    driver: bridge
