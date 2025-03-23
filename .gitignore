@@ -2,4 +2,4 @@
 /backend/__pycache__
 # /backend/config.py
 # /frontend/next.config.mjs
-/.env
+.env*
