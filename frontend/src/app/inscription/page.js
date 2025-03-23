@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import API_URL from "../config";
 
 function Inscription() {
   const [email, setEmail] = useState("");
@@ -22,7 +23,7 @@ function Inscription() {
       // {
       //   "email": "test@email.com"
       // }
-      const response = await fetch("http://backend:5000/security/inscription", {
+      const response = await fetch(`${API_URL}/security/inscription`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

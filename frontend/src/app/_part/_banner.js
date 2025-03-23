@@ -3,9 +3,20 @@ import Link from "next/link";
 function Banner() {
   return (
     <div>
-      <Link href={"/"}>
-        Home
-      </Link>
+      <ul>
+        <li>      
+          <Link href={"/mairie"}>
+            Home
+          </Link>
+        </li>
+        <li>      
+          <Link href={"/mairie/inscription"}>
+            Inscription
+          </Link>
+        </li>
+      </ul>
+
+
     </div>
   );
 }

@@ -1,21 +1,13 @@
 services:
+
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
-    # environment:
-    #   - MAIL_SERVER=${MAIL_SERVER}
-    #   - MAIL_PORT=${MAIL_PORT}
-    #   - MAIL_USE_TLS=${MAIL_USE_TLS}
-    #   - MAIL_USE_SSL=${MAIL_USE_SSL}
-    #   - MAIL_USERNAME=${MAIL_USERNAME}
-    #   - MAIL_PASSWORD=${MAIL_PASSWORD}
-    #   - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER}
     volumes:
-      # - ./backend:/app  # Monte le répertoire local ./backend dans le conteneur à /app
-      - ../../bd:/app/bd # Monte le répertoire local ../../bd dans le conteneur à /app/bd
+      - db_data:/app/bd  # Monte le volume db_data dans le conteneur à /app/bd
     command: gunicorn wsgi:app --bind 0.0.0.0:5000
     networks:
       - frontend-backend-network
@@ -29,12 +21,19 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV="production"
-    # volumes:
-    #   - ./frontend:/app  # Monte le répertoire local ./frontend dans le conteneur à /app
+      - NODE_ENV=production
     networks:
       - frontend-backend-network
 
 networks:
   frontend-backend-network:
     driver: bridge
+
+volumes:
+  db_data:  # Création du volume db_data
+    # Optionnel : tu peux ajouter des options ici, par exemple, si tu veux spécifier un driver ou un chemin
+    # driver: local
+    # driver_opts:
+    #   type: none
+    #   device: /path/to/your/local/dir
+    #   o: bind
