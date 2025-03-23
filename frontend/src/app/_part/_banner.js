@@ -5,12 +5,12 @@ function Banner() {
     <div>
       <ul>
         <li>      
-          <Link href={"/mairie"}>
+          <Link href={"/"}>
             Home
           </Link>
         </li>
         <li>      
-          <Link href={"/mairie/inscription"}>
+          <Link href={"/inscription"}>
             Inscription
           </Link>
         </li>
