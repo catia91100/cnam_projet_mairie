@@ -29,3 +29,5 @@ EXPOSE 5000
 
 # Commande pour démarrer Flask en production avec Gunicorn
 CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
+# Définir la commande par défaut pour exécuter l'application avec Gunicorn
+# CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:8000"]

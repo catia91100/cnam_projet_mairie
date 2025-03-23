@@ -26,7 +26,12 @@ def create_app():
     with app.app_context():
         init_db()
 
-    CORS(app)
+    CORS(app,
+         resources={r"/*": {
+             "origins": "http://localhost:3000"
+         }},
+         supports_credentials=True)
+
     cache.init_app(app)
     limiter.init_app(app)
     jwt.init_app(app)

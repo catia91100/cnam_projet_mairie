@@ -3,3 +3,4 @@
 # /backend/config.py
 # /frontend/next.config.mjs
 .env*
+/backend/.env*
