@@ -6,7 +6,7 @@ from dtos.user_dto import UserDTO
 from services.user_service import insert_user, verify_login, get_user_by_email, update_login_at
 from services.token_service import insert_token, delete_token, delete_expired_tokens, check_token_exists
 from datetime import datetime, timezone
-import jwt, hashlib, uuid
+import hashlib, uuid
 from dtos.token_dto import TokenDTO
 
 security_blueprint = Blueprint("security", __name__)

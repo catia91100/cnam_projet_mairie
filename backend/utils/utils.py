@@ -3,9 +3,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message
 from flask import current_app
 from jinja2 import Template
-from datetime import datetime, timezone, timedelta
+from datetime import timedelta
 from flask_jwt_extended import create_access_token
-from dtos.token_dto import TokenDTO  # Assure-toi que le DTO TokenDTO est bien importé
 
 
 def generate_psw(length: int = 20) -> str:

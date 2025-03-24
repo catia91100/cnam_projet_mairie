@@ -9,7 +9,7 @@ from flask_mail import Mail
 from flask_caching import Cache  # Importing Flask-Caching
 
 # Initialize extensions
-jwt = JWTManager()
+jwt_manager = JWTManager()
 mail = Mail()
 cache = Cache()  # Initialize cache object
 
@@ -34,7 +34,7 @@ def create_app():
 
     cache.init_app(app)
     limiter.init_app(app)
-    jwt.init_app(app)
+    jwt_manager.init_app(app)
     mail.init_app(app)
     register_blueprints(app)
 
