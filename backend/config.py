@@ -6,7 +6,7 @@ from typing import Optional
 
 # Charger les variables d'environnement depuis un fichier .env
 load_dotenv(
-    '.env.dev'
+    '.env'
 )  # Charge les variables d'environnement spécifiques au dev (si tu utilises un fichier .env.dev)
 
 limiter = Limiter(
