@@ -25,6 +25,7 @@ def init_db():
 
     # Import all models here, make sure they are registered before creating the tables
     from models.token_model import Token
+    from models.role_model import Role
     from models.user_model import User
     # If other models exist, un-comment their import lines:
     # from models.category_model import Category

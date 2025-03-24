@@ -1,7 +1,7 @@
 from datetime import datetime, timezone, date
 from . import Base
-from sqlalchemy.orm import mapped_column, Mapped
-from sqlalchemy import String, DateTime
+from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy import String, DateTime, ForeignKey
 from typing import Optional
 
 aware_datetime = datetime.now(timezone.utc)
@@ -20,6 +20,12 @@ class User(Base):
                                                   DateTime(timezone=True),
                                                   default=aware_datetime)
     _login_at: Mapped[Optional[datetime]] = mapped_column("login_at")
+    _role: Mapped[Optional[str]] = mapped_column("role",
+                                                 ForeignKey("role.name"),
+                                                 nullable=True)
+
+    role: Mapped[Optional["Role"]] = relationship("Role",
+                                                  back_populates="users")
 
     def __init__(self,
                  email: str,
@@ -27,7 +33,8 @@ class User(Base):
                  firstname: str = None,
                  lastname: str = None,
                  birth_at: datetime = None,
-                 login_at: datetime = None):
+                 login_at: datetime = None,
+                 role=None):
         """
         Constructeur de la classe User.
         
@@ -44,6 +51,7 @@ class User(Base):
         self._lastname = lastname
         self._birth_at = birth_at
         self._login_at = login_at
+        self._role = role
 
     def __repr__(self):
 

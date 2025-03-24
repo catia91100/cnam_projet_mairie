@@ -56,7 +56,7 @@ class Security:
             insert_token(token_dto)
 
             # Générer l'URL de validation avec le token
-            validation_url = f"{current_app.config['BASE_URL']}/security/validation-email?token={token_dto.token}"
+            validation_url = f"{current_app.config['BASE_URL']}/completer-inscription/?token={token_dto.token}"
 
             # Dictionnaire des variables pour le template
             context = {
@@ -231,7 +231,7 @@ class Security:
             }), 500
 
     @staticmethod
-    @security_blueprint.route('/logins', methods=['POST'])
+    @security_blueprint.route('/login', methods=['POST'])
     def login():
         try:
             # Récupérer les données du corps de la requête
@@ -261,10 +261,18 @@ class Security:
             # Retourner la réponse JSON avec le token
 
             update_login_at(email)
+            # return jsonify({
+            #     'message': 'Login successful',
+            #     'email': user._email,
+            #     # 'role' : user._role||'ROLE_USER'
+            #     'token': token
+            # }), 200
             return jsonify({
-                'message': 'Login successful',
-                'email': user._email,
-                'token': token
+                "message": "Login successful",
+                "user": {
+                    "lastname": user._lastname[0],
+                    "token": token
+                },
             }), 200
 
         except IntegrityError as e:

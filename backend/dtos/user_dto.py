@@ -15,6 +15,7 @@ class UserDTO(BaseModel):
     birth_at: Optional[date] = None
     created_at: datetime = None
     login_at: Optional[datetime] = None
+    role: Optional[str] = None
 
     class Config:
         from_attributes = True  # Permet de convertir depuis un modèle SQLAlchemy
@@ -52,4 +53,5 @@ def user_to_dto(user: User) -> UserDTO:
         lastname=user._lastname,
         birth_at=user._birth_at,
         created_at=user._created_at,
-        login_at=user._login_at)
+        login_at=user._login_at,
+        role=user._role)

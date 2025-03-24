@@ -25,8 +25,9 @@ class Role(Base):
 
     users: Mapped[Optional[List["User"]]] = relationship("User",
                                                          back_populates="role")
-    categories: Mapped[Optional[List["Category"]]] = relationship(
-        "Category", back_populates="role")
+
+    # categories: Mapped[Optional[List["Category"]]] = relationship(
+    #     "Category", back_populates="role")
 
     # inherited_roles: Mapped[List["Role"]] = relationship(
     #     "Role",
@@ -81,14 +82,14 @@ class Role(Base):
         """
         return self.users
 
-    def get_categories(self) -> Optional[List["Category"]]:
-        """
-        Retourne la liste des catégories associées à ce rôle.
+    # def get_categories(self) -> Optional[List["Category"]]:
+    #     """
+    #     Retourne la liste des catégories associées à ce rôle.
 
-        Returns:
-            Optional[List[Category]]: Liste des catégories ou None.
-        """
-        return self.categories
+    #     Returns:
+    #         Optional[List[Category]]: Liste des catégories ou None.
+    #     """
+    #     return self.categories
 
     # Setters
     def set_name(self, name: str) -> None:
