@@ -5,6 +5,9 @@ from dtos.user_dto import user_to_dto  # Assuming this function is in dtos/user_
 from services.token_service import check_token_exists, delete_token, delete_expired_tokens, insert_token
 from utils.utils import generate_token, send_email
 from datetime import datetime
+import hashlib, uuid
+from dtos.user_dto import UserDTO
+from dtos.token_dto import TokenDTO
 
 # Création du blueprint 'account'
 account_blueprint = Blueprint('account', __name__)
@@ -203,59 +206,114 @@ class Account:
                 'details': str(e)
             }), 500
 
-    @staticmethod
-    @account_blueprint.route('/update', methods=['PUT'])
-    @jwt_required()
-    def update_account():
-        try:
-            # Récupérer l'email de l'utilisateur connecté depuis le JWT
-            email = get_jwt_identity()
 
-            # Récupérer l'utilisateur en base de données
-            user = get_user_by_email(email)
-            if not user:
-                return jsonify({'error': 'User not found'}), 404
+@account_blueprint.route('/update', methods=['PUT'])
+@jwt_required()
+def update_account():
+    try:
+        # Récupérer l'email de l'utilisateur connecté depuis le JWT
+        email: str = get_jwt_identity()
 
-            # Récupérer les données envoyées dans la requête
-            data = request.get_json()
-            if not data:
-                return jsonify({'error':
-                                'Invalid request, JSON required'}), 400
+        # Récupérer l'utilisateur en base de données
+        user = get_user_by_email(email)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
 
-            # Vérifier si un email a été fourni dans les données postées
-            new_email = data.get('email')
-            token = None  # Initialisation du token
+        # Récupérer les données envoyées dans la requête
+        data: dict = request.get_json()
+        if not data:
+            return jsonify({'error': 'Invalid request, JSON required'}), 400
 
-            if new_email and new_email != user._email:
-                # Vérifier si l'email existe déjà en base
-                existing_user = get_user_by_email(new_email)
-                if existing_user:
-                    return jsonify({'error': 'Email already taken'}), 400
+        # Initialiser la variable pour le token
+        token = None
 
-                # Générer un token JWT pour la validation du nouvel email
-                claims = {"new_email": new_email}
-                token = generate_token(email=user._email,
-                                       expiration_hours=1,
-                                       claims=claims)
-                validation_url = f"{current_app.config['BASE_URL']}/account/update-email?token={token}"
-                context = {
-                    "user_email": updated_data["firstname"],
-                    "validation_url": validation_url,
-                    "current_year": datetime.now().year
-                }
-                send_email("Please validate your new email", [new_email],
-                           "mail/email_new.html", context)
+        # Vérifier si l'email est dans les données envoyées
+        new_email = data.get('email')
 
+        # Comparer les autres champs et mettre à jour si nécessaire
+        # if new_email and new_email != user._email:
+        #     return jsonify({'error': 'Email cannot be updated directly'}), 400
+
+        # Liste des champs à mettre à jour
+        fields_to_update = {}
+        user_dto: UserDTO = user_to_dto(user)
+        # Comparer les autres champs et ajouter les modifications
+        for field, value in data.items():
+            if hasattr(user_dto, field) and getattr(user_dto, field) != value:
+                fields_to_update[field] = value
+        if "role" in fields_to_update:
+            del fields_to_update["role"]
+        if "login_at" in fields_to_update:
+            del fields_to_update["login_at"]
+        if "created_at" in fields_to_update:
+            del fields_to_update["created_at"]
+        # Si aucun champ à mettre à jour, on renvoie une réponse appropriée
+        if not fields_to_update:
             return jsonify({
-                'message': 'User and data retrieved successfully',
-                'user': user_to_dto(user).to_dict(),
-                'posted_data': data,
-                'email_verification_token':
-                token  # Retourner le token si généré
+                'message': 'No changes to update.',
+                'user': user_to_dto(user).to_dict()
             }), 200
 
-        except Exception as e:
-            return jsonify({
-                'error': 'An unexpected error occurred',
-                'details': str(e)
-            }), 500
+        # Mettre à jour les champs de l'utilisateur
+        for field, value in fields_to_update.items():
+            setattr(user_dto, field, value)
+        # Sauvegarder les changements en base de données (assume que tu as une fonction `update_user`)
+        # print(user_dto, email)
+        update_user(email, user_dto)
+
+        # Si l'email a été modifié, gérer la logique de validation du nouvel email
+        if new_email and new_email != user._email:
+            # user_dto = UserDTO(**data)
+
+            # Générer un salt unique pour la création du token
+            salt = str(uuid.uuid4())  # Générer un salt unique
+
+            # Supprimer les tokens périmés avant de créer un nouveau
+            delete_expired_tokens()
+
+            # Créer un hash de l'email pour pouvoir vérifier la correspondance plus tard
+            email_hash = hashlib.sha256(user_dto.email.encode()).hexdigest()
+
+            # Générer un token JWT avec une expiration de 1 heure
+            token = generate_token(user_dto.email,
+                                   expiration_hours=1,
+                                   salt=salt)
+
+            # Créer un TokenDTO avec le token, email hashé et salt
+            token_dto = TokenDTO(
+                token=token,  # Le token généré
+                data=email_hash,  # Email hashé
+                salt=salt  # Le salt utilisé pour générer le token
+            )
+
+            # Persister le token en base de données avec l'email hashé et le salt utilisé
+            insert_token(token_dto)
+
+            # Générer l'URL de validation avec le token
+            validation_url = f"{current_app.config['BASE_URL']}/completer-inscription/?token={token_dto.token}"
+
+            # Dictionnaire des variables pour le template
+            context = {
+                'user_name': user_dto.firstname or 'Utilisateur',
+                'user_email': user_dto.email,
+                'validation_url': validation_url,
+                'current_year': datetime.now().year
+            }
+
+            # Envoi du mail avec le template
+            send_email(subject="Confirmez votre inscription",
+                       recipients=[user_dto.email],
+                       template="mail/email_new.html",
+                       context=context)
+
+        return jsonify({
+            'message': 'User updated successfully',
+            'user': user_dto.to_dict(),
+            'email_verification_token': token  # Retourner le token si généré
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'error': 'An unexpected error occurred',
+            'details': str(e)
+        }), 500

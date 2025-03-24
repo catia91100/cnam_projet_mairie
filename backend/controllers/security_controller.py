@@ -26,7 +26,7 @@ class Security:
                 return jsonify({'error': 'Email already in use'}), 409
 
             # Générer un mot de passe si nécessaire
-            data['password'] = generate_psw()
+            # data['password'] = generate_psw()
 
             # Validation Pydantic du DTO
             user_dto = UserDTO(**data)
