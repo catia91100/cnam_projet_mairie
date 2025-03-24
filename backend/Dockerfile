@@ -28,4 +28,8 @@ COPY . .
 EXPOSE 5000
 
 # Commande pour démarrer Flask en production avec Gunicorn
-CMD ["gunicorn", "-c", "/app/gunicorn.conf.py", "app:app"]
+# CMD ["gunicorn", "-c", "/app/gunicorn.conf.py", "app:app"]
+# CMD ["gunicorn", "-c", "/app/gunicorn.conf.py", "app:app"]
+CMD ["gunicorn", "-c", "/app/gunicorn.conf.py", "wsgi:app"]
+
+
