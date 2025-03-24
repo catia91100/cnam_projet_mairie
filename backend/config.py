@@ -29,7 +29,7 @@ class Config:
         'JWT_SECRET_KEY',
         'super-secret')  # Utilisation de la variable d'environnement
 
-    BASE_URL = 'http://localhost:5000'
+    BASE_URL: str = os.getenv('NEXT_PUBLIC_API_URL', 'http://localhost:5000')
 
     # Configuration du serveur mail (développement par défaut)
     MAIL_SERVER: str = os.getenv('MAIL_SERVER', "127.0.0.1")
