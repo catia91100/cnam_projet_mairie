@@ -1,10 +1,9 @@
 from flask import Blueprint, jsonify, request, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from services.user_service import get_user_by_email, update_user  # Assuming this function is in services/user_service.py
-from dtos.user_dto import user_to_dto, UserDTO  # Assuming this function is in dtos/user_dto.py
+from dtos.user_dto import user_to_dto  # Assuming this function is in dtos/user_dto.py
 from services.token_service import check_token_exists, delete_token, delete_expired_tokens, insert_token
 from utils.utils import generate_token, send_email
-from pydantic import ValidationError, EmailStr
 from datetime import datetime
 
 # Création du blueprint 'account'
@@ -159,7 +158,7 @@ class Account:
 
             # Décoder le token pour récupérer l'email de l'utilisateur et le new_email
             try:
-                decoded_token = current_app.extensions['jwt'].decode(
+                decoded_token = current_app.extensions['jwt_manager'].decode(
                     token,
                     current_app.config['JWT_SECRET_KEY'],
                     algorithms=['HS256'])
@@ -171,9 +170,9 @@ class Account:
                 if not new_email:
                     return jsonify({'error':
                                     'New email is missing in token'}), 400
-            except current_app.extensions['jwt'].ExpiredSignatureError:
+            except current_app.extensions['jwt_manager'].ExpiredSignatureError:
                 return jsonify({'error': 'Token has expired'}), 400
-            except current_app.extensions['jwt'].InvalidTokenError:
+            except current_app.extensions['jwt_manager'].InvalidTokenError:
                 return jsonify({'error': 'Invalid token'}), 400
 
             # Récupérer l'utilisateur actuel depuis la base de données

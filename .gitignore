@@ -4,3 +4,4 @@
 # /frontend/next.config.mjs
 .env*
 /backend/.env*
+

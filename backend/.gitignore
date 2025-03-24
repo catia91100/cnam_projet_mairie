@@ -1,0 +1,6 @@
+# Ignorer les fichiers compilés Python
+__pycache__/
+*.pyc
+*.pyo
+/bd/exemple.bd
+# !/bd/.gitkeep
