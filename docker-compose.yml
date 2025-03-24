@@ -1,6 +1,7 @@
 services:
 
   backend:
+    container_name: backend  # Nom personnalisé du conteneur backend
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -13,6 +14,7 @@ services:
       - frontend-backend-network
 
   frontend:
+    container_name: frontend  # Nom personnalisé du conteneur backend
     build:
       context: ./frontend
       dockerfile: Dockerfile
