@@ -7,7 +7,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - db_data:/app/bd  # Monte le volume db_data dans le conteneur à /app/bd
+      - db_data:/app/db  # Monte le volume db_data dans le conteneur à /app/bd
     # command: gunicorn wsgi:app --bind 0.0.0.0:5000
     networks:
       - frontend-backend-network
