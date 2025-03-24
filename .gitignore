@@ -1,10 +1,11 @@
-/frontend/node_modules
-*/__pycache__/
-*.pyc
-*.pyo
-*/exemple.db
-# /backend/config.py
-# /frontend/next.config.mjs
-.env*
-/backend/.env*
+# Ignorer le dossier node_modules partout
+node_modules/
 
+# Ignorer tous les dossiers __pycache__ dans le projet
+__pycache__/
+
+# Ignorer tous les fichiers .env et ses variantes (.env.local, .env.example, etc.)
+.env*
+
+backend/db/*
+!backend/db/.gitkeep
