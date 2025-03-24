@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Supprimer tous les conteneurs arrêtés
 echo "Suppression des conteneurs arrêtés..."
 docker container prune -f
