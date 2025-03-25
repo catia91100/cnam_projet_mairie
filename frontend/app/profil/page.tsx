@@ -1,8 +1,8 @@
 "use client";
-import GetCookie from "../_fct/GetCookie";
+import GetCookie from "@/app/_fct/GetCookie";
 import { useState, useEffect } from "react";
 import { redirect } from "next/navigation";
-import API_URL from "../config";
+import API_URL from "@/app/config";
 
 function Profil() {
   const [data, setData] = useState(null);
@@ -113,14 +113,14 @@ function Profil() {
         <div className="grid grid-cols-4 items-center lg:col-span-3">
           <span className="">Rôle :</span>
           {/* <label className="input input-bordered flex items-center gap-2 col-span-3"> */}
-            <span className="badge badge-primary">Admin</span>
+          <span className="badge badge-primary">Admin</span>
           {/* </label> */}
         </div>
       )}
 
       <a
         className="btn text-white bg-[var(--color-1)] lg:col-start-3 lg:col-span-2 my-11 w-60 mx-auto"
-        href="/profil/edit"
+        href={`/profil/edit`}
       >
         Modifier
       </a>

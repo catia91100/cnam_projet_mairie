@@ -3,8 +3,18 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message
 from flask import current_app
 from jinja2 import Template
-from datetime import timedelta
+from datetime import timedelta, datetime
 from flask_jwt_extended import create_access_token
+
+
+def parse_date(date_str):
+    try:
+        # Convertir la chaîne en objet datetime
+        dt = datetime.strptime(date_str, "%a, %d %b %Y %H:%M:%S %Z")
+        # Extraire uniquement la partie date (YYYY-MM-DD)
+        return dt.date()
+    except ValueError:
+        return None  # Retourne None si la conversion échoue
 
 
 def generate_psw(length: int = 20) -> str:

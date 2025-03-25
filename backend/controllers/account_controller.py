@@ -230,41 +230,50 @@ def update_account():
         # Vérifier si l'email est dans les données envoyées
         new_email = data.get('email')
 
-        # Comparer les autres champs et mettre à jour si nécessaire
-        # if new_email and new_email != user._email:
-        #     return jsonify({'error': 'Email cannot be updated directly'}), 400
-
         # Liste des champs à mettre à jour
         fields_to_update = {}
+        # Initialiser le DTO avec les données actuelles
         user_dto: UserDTO = user_to_dto(user)
+
         # Comparer les autres champs et ajouter les modifications
         for field, value in data.items():
+            # Conversion des champs de type date avant de les affecter
+            if field in ['birth_at'] and isinstance(value, str):
+                try:
+                    # Conversion de la chaîne de caractères en datetime.date ou datetime
+                    if field == 'birth_at':
+                        value = datetime.strptime(value, "%Y-%m-%d").date()
+                    else:
+                        value = datetime.strptime(value,
+                                                  "%a, %d %b %Y %H:%M:%S GMT")
+                except ValueError:
+                    return jsonify(
+                        {'error': f"Invalid date format for {field}"}), 400
+
+            # Ajouter à la liste des champs à mettre à jour
             if hasattr(user_dto, field) and getattr(user_dto, field) != value:
                 fields_to_update[field] = value
-        if "role" in fields_to_update:
-            del fields_to_update["role"]
-        if "login_at" in fields_to_update:
-            del fields_to_update["login_at"]
-        if "created_at" in fields_to_update:
-            del fields_to_update["created_at"]
-        # Si aucun champ à mettre à jour, on renvoie une réponse appropriée
+
+        # Exclure certains champs qui ne doivent pas être modifiés
+        for field in ["role", "login_at", "created_at"]:
+            if field in fields_to_update:
+                del fields_to_update[field]
+
+        # Si aucun champ à mettre à jour, retourner un message approprié
         if not fields_to_update:
             return jsonify({
                 'message': 'No changes to update.',
-                'user': user_to_dto(user).to_dict()
+                'user': user_dto.to_dict()
             }), 200
 
-        # Mettre à jour les champs de l'utilisateur
+        # Appliquer les mises à jour
         for field, value in fields_to_update.items():
             setattr(user_dto, field, value)
-        # Sauvegarder les changements en base de données (assume que tu as une fonction `update_user`)
-        # print(user_dto, email)
-        update_user(email, user_dto)
 
+        # Vérifier les changements avant de sauvegarder
+        update_user(email=email, user_dto=user_dto)
         # Si l'email a été modifié, gérer la logique de validation du nouvel email
         if new_email and new_email != user._email:
-            # user_dto = UserDTO(**data)
-
             # Générer un salt unique pour la création du token
             salt = str(uuid.uuid4())  # Générer un salt unique
 
@@ -305,6 +314,9 @@ def update_account():
                        recipients=[user_dto.email],
                        template="mail/email_new.html",
                        context=context)
+
+        # Sauvegarder les changements en base de données
+        update_user(email, user_dto)
 
         return jsonify({
             'message': 'User updated successfully',
