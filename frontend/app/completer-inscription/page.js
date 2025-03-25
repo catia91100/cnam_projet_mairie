@@ -1,7 +1,7 @@
 "use client";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import API_URL from "../config";
+import API_URL from "@/config";
 
 function CompleterInscription() {
   const params = useSearchParams();
@@ -110,8 +110,9 @@ function CompleterInscription() {
       );
       const data = await response.json();
       if (response.ok) {
-        alert("Inscription complétée avec succès !");
-        router.push("/login");
+        alert();
+        const encodedMessage = encodeURIComponent("Inscription complétée avec succès !");
+        router.push(`/login?success=${encodedMessage}`);
       } else {
         setErrorMessage(data.message || "Une erreur est survenue.");
       }

@@ -180,3 +180,48 @@ def update_login_at(email: str) -> User:
 
     finally:
         session.close()  # Assurez-vous de fermer la session à la fin
+
+
+def update_user_email(old_email: str, new_user_dto: UserDTO) -> User:
+    """Met à jour l'email d'un utilisateur.
+
+    Args:
+        old_email (str): L'email actuel de l'utilisateur.
+        new_email (str): Le nouvel email de l'utilisateur.
+
+    Returns:
+        User: L'objet utilisateur mis à jour avec le nouvel email.
+    """
+    session = create_session_local()  # Créer une session locale
+    try:
+        # Recherche de l'utilisateur par l'ancien email
+        user = session.query(User).filter_by(_email=old_email).first()
+
+        if not user:
+            raise ValueError(
+                f"Utilisateur avec l'email {old_email} non trouvé.")
+
+        # Vérifier si le nouvel email est déjà pris
+        if session.query(User).filter_by(_email=new_user_dto.email).first():
+            raise ValueError(
+                f"L'email {new_user_dto.email} est déjà associé à un autre utilisateur."
+            )
+
+        # Mise à jour de l'email
+        user._email = new_user_dto.email
+
+        # Sauvegarde des modifications
+        session.commit()
+        session.refresh(
+            user)  # Rafraîchir l'objet pour obtenir les valeurs mises à jour
+
+        return user  # Retourner l'utilisateur mis à jour avec le nouvel email
+
+    except Exception as e:
+        session.rollback()
+        raise ValueError(
+            f"Erreur lors de la mise à jour de l'email de l'utilisateur : {str(e)}"
+        )
+
+    finally:
+        session.close()  # Assurez-vous de fermer la session à la fin

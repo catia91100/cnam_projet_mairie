@@ -2,12 +2,14 @@ from flask import Blueprint, jsonify, request, current_app
 from sqlalchemy.exc import IntegrityError
 from pydantic import ValidationError
 from utils.utils import generate_psw, send_email, generate_token, hash_password, decode_token_custom
-from dtos.user_dto import UserDTO
+from dtos.user_dto import UserDTO, user_to_dto
 from services.user_service import insert_user, verify_login, get_user_by_email, update_login_at
 from services.token_service import insert_token, delete_token, delete_expired_tokens, check_token_exists
 from datetime import datetime, timezone
 import hashlib, uuid
 from dtos.token_dto import TokenDTO
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from models.user_model import User
 
 security_blueprint = Blueprint("security", __name__)
 
@@ -286,3 +288,81 @@ class Security:
                 'error': 'An unexpected error occurred',
                 'details': str(e)
             }), 500
+
+    @security_blueprint.route('/reset_request', methods=['GET'])
+    @jwt_required()
+    def reset_request():
+        try:
+            # Récupérer les données du corps de la requête
+            email: str = get_jwt_identity()
+
+            # Vérifier si un utilisateur existe déjà avec cet email
+            user: User = get_user_by_email(email)
+            if not user:
+                raise ValidationError()
+
+            # Générer un mot de passe si nécessaire
+            # data['password'] = generate_psw()
+
+            # Validation Pydantic du DTO
+            user_dto: UserDTO = user_to_dto(user)
+
+            # Générer un salt unique pour la création du token
+            salt = str(uuid.uuid4())  # Générer un salt unique
+
+            # Supprimer les tokens périmés avant de créer un nouveau
+            delete_expired_tokens()
+
+            # Créer un hash de l'email pour pouvoir vérifier la correspondance plus tard
+            email_hash = hashlib.sha256(user_dto.email.encode()).hexdigest()
+
+            # Générer un token JWT avec une expiration de 1 heure
+            token = generate_token(user_dto.email,
+                                   expiration_hours=1,
+                                   salt=salt)
+
+            # Créer un TokenDTO avec le token, email hashé et salt
+            token_dto = TokenDTO(
+                token=token,  # Le token généré
+                data=email_hash,  # Email hashé
+                salt=salt  # Le salt utilisé pour générer le token
+            )
+
+            # Persister le token en base de données avec l'email hashé et le salt utilisé
+            insert_token(token_dto)
+
+            # Générer l'URL de validation avec le token
+            validation_url = f"{current_app.config['BASE_URL']}/set-password?token={token_dto.token}"
+
+            # Dictionnaire des variables pour le template
+            context = {
+                'user_name': user_dto.firstname or 'Utilisateur',
+                'reset_url': validation_url,
+                'current_year': datetime.now().year
+            }
+
+            # Envoi du mail avec le template
+            send_email(subject="Réinitialisation mot de passe",
+                       recipients=[user_dto.email],
+                       template="mail/reset.html",
+                       context=context)
+
+            # Retourner une réponse réussie avec le DTO
+            return jsonify({'email': user_dto.email}), 200
+
+        except ValidationError as e:
+            return jsonify({
+                'error': 'Invalid data',
+                'details': e.errors()
+            }), 400
+
+        except Exception as e:
+            return jsonify({
+                'error': 'An unexpected error occurred',
+                'details': str(e)
+            }), 500
+
+    @security_blueprint.route('/set-password', methods=['GET'])
+    # @jwt_required()
+    def set_password():
+        return jsonify({"uyuy": "kjhjkkh"}), 200

@@ -9,6 +9,7 @@ function ProfilEdit() {
   const [token, setToken] = useState(null);
   const [handleUser, setHandleUser] = useState({});
   const [passwordIsReset, setPasswordIsReset] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -37,6 +38,7 @@ function ProfilEdit() {
         setData(data);
         // Initialiser handleUser avec les valeurs actuelles de l'utilisateur
         setHandleUser({
+          email: data.email, // Ajout de l'email dans l'état pour la modification
           birth_at: new Date(data.birth_at).toISOString().split("T")[0],
           firstname: data.firstname,
           lastname: data.lastname,
@@ -72,8 +74,9 @@ function ProfilEdit() {
   async function handleSubmit(e) {
     e.preventDefault();
 
+    // Ajoutez l'email modifié au body si nécessaire
     let userNew = {
-      email: user.email,
+      email: handleUser.email || user.email, // Si l'email est modifié, il est inclus
       birth_at: handleUser.birth_at,
       firstname: handleUser.firstname || user.firstname,
       lastname: handleUser.lastname || user.lastname,
@@ -94,128 +97,155 @@ function ProfilEdit() {
       }
 
       const data = await response.json();
-      if (
-        data.message === "User updated successfully" ||
-        data.message === "No changes to update."
-      ) {
-        console.log("Mise à jour réussie");
-        router.push("/profil");
+      const message =
+        data.success === "User updated successfully" ||
+        data.success === "No changes to update."
+          ? "User updated successfully"
+          : "Error updating user";
+
+      // Si data contient 'new_email', rediriger vers profil avec le nouvel email
+      if (data.user.new_email) {
+        router.push(`/profil?new_email=${data.user.new_email}`);
+      } else {
+        router.push(`/profil?success=${true}`);
       }
     } catch (error) {
       console.error("Erreur lors de la mise à jour du profil:", error);
     }
   }
 
-  async function passwordReset() {
-    if (confirm("Confirmer la demande de réinitialisation ?")) {
-      try {
-        const response = await fetch(`${API_URL}/reset_request/${user.email}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        setPasswordIsReset(true);
-      } catch (error) {
-        console.error("Error sending password reset request:", error);
+  async function handlePasswordReset(e) {
+    try {
+      e.preventDefault();
+      const response = await fetch(`${API_URL}/security/reset_request`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      setPasswordIsReset(true);
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error sending password reset request:", error);
     }
   }
 
   return (
-    <main className="grid gap-6 lg:mx-40 lg:my-20 px-4">
-      {passwordIsReset && (
-        <div role="alert" className="alert alert-info mb-6">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            className="h-6 w-6 shrink-0 stroke-current mr-2"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
-          </svg>
-          <span>
-            Un mail vous a été envoyé afin de réinitialiser votre mot de passe.
-          </span>
-        </div>
-      )}
+    <form
+      onSubmit={handleSubmit}
+      className="relative space-y-6 max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg"
+    >
+      <button
+        type="button"
+        className="absolute top-4 right-4 btn btn-secondary p-2 rounded-full w-12"
+        onClick={() => {
+          // Ajoutez votre lien de retour ici
+          router.push("/profil");
+        }}
+      >
+        ✕
+      </button>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <h2 className="text-2xl font-semibold text-center">
-          Modifier votre profil
-        </h2>
+      <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
+        Modifier votre profil
+      </h1>
 
-        <div className="flex items-center justify-between space-x-4">
-          <span className="font-medium">Email :</span>
+      <div className="grid gap-6">
+        <label className="block">
+          <span className="font-semibold text-gray-700">Email :</span>
           <input
             type="email"
-            className="input input-bordered w-full max-w-xl"
-            value={user.email}
-            disabled
+            className="input input-bordered w-full max-w-md mt-2 p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={handleUser.email}
+            onChange={handleChange}
+            id="email"
           />
-        </div>
+        </label>
 
-        <button
-          className="btn btn-warning w-full max-w-xs mx-auto my-4"
-          onClick={passwordReset}
-          disabled={passwordIsReset}
-        >
-          Réinitialiser le mot de passe
-        </button>
-
-        <div className="flex items-center justify-between space-x-4">
-          <span className="font-medium">Nom :</span>
+        <label className="block">
+          <span className="font-semibold text-gray-700">Nom :</span>
           <input
             type="text"
-            className="input input-bordered w-full max-w-xl"
+            className="input input-bordered w-full max-w-md mt-2 p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={handleUser.lastname}
             onChange={handleChange}
             id="lastname"
             required
           />
-        </div>
+        </label>
 
-        <div className="flex items-center justify-between space-x-4">
-          <span className="font-medium">Prénom :</span>
+        <label className="block">
+          <span className="font-semibold text-gray-700">Prénom :</span>
           <input
             type="text"
-            className="input input-bordered w-full max-w-xl"
+            className="input input-bordered w-full max-w-md mt-2 p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={handleUser.firstname}
             onChange={handleChange}
             id="firstname"
           />
-        </div>
+        </label>
 
-        <div className="flex items-center justify-between space-x-4">
-          <span className="font-medium">Date de naissance :</span>
+        <label className="block">
+          <span className="font-semibold text-gray-700">
+            Date de naissance :
+          </span>
           <input
             type="date"
-            className="input input-bordered w-full max-w-xl"
+            className="input input-bordered w-full max-w-md mt-2 p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={handleUser.birth_at}
             onChange={handleChange}
             id="birth_at"
             required
           />
-        </div>
-
+        </label>
+      </div>
+      <div className="flex">
         <button
-          className="btn text-white bg-[var(--color-1)] w-full max-w-xs mx-auto mt-8"
+          type="button"
+          className="btn btn-warning w-full max-w-xs mx-auto my-4 rounded-full"
+          onClick={() => setShowModal(true)}
+          disabled={passwordIsReset}
+        >
+          Réinitialiser le mot de passe
+        </button>
+      </div>
+
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+            <p className="mb-4 text-gray-700">
+              Confirmez-vous la réinitialisation du mot de passe ?
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                className="btn btn-error rounded-full"
+                onClick={() => setShowModal(false)}
+              >
+                Annuler
+              </button>
+              <button
+                className="btn btn-success rounded-full"
+                onClick={handlePasswordReset}
+              >
+                Confirmer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="flex">
+        <button
           type="submit"
+          className="btn text-white bg-[var(--color-1)] w-full max-w-xs mx-auto mt-8 p-3 rounded-full"
         >
           Sauvegarder
         </button>
-      </form>
-    </main>
+      </div>
+    </form>
   );
 }
 

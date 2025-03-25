@@ -1,11 +1,14 @@
 "use client";
 import { useState } from "react";
-import API_URL from "../config";
+import API_URL from "@/app/config";
+import { useSearchParams } from "next/navigation";
+import ClearURL from "@/app/components/ClearURL";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const searchParams = useSearchParams();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,9 +39,10 @@ function Login() {
       setErrorMessage("Une erreur est survenue lors de la connexion.");
     }
   };
-
+  const successMessage = searchParams.get("success");
+  ClearURL()
   return (
-    <main className="mt-[1rem] flex justify-center items-center flex-col">
+    <main className="mt-[1rem] flex justify-center items-center flex-col relative">
       <h1 className="text-2xl my-5">Formulaire de connexion</h1>
       <form className="grid gap-3" onSubmit={handleSubmit}>
         {errorMessage && (
@@ -73,6 +77,24 @@ function Login() {
           Connexion
         </button>
       </form>
+      {successMessage && (
+        <div className="alert alert-info mb-6 absolute -top-7 mt-10 lg:mt-0">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            className="h-6 w-6 shrink-0 stroke-current mr-2"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <span>{decodeURIComponent(successMessage)}</span>
+        </div>
+      )}
     </main>
   );
 }
