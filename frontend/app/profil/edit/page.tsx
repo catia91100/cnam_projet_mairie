@@ -117,13 +117,7 @@ function ProfilEdit() {
   async function handlePasswordReset(e) {
     try {
       e.preventDefault();
-      const response = await fetch(`${API_URL}/security/reset-request`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(`${API_URL}/security/reset-request/${handleUser.email}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

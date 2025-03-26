@@ -3,6 +3,9 @@ import { useState } from "react";
 import API_URL from "@/app/config";
 import { useSearchParams } from "next/navigation";
 import ClearURL from "@/app/components/ClearURL";
+import GetCookie from "../_fct/GetCookie";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -40,7 +43,7 @@ function Login() {
     }
   };
   const successMessage = searchParams.get("success");
-  ClearURL()
+  ClearURL();
   return (
     <main className="mt-[1rem] flex justify-center items-center flex-col relative">
       <h1 className="text-2xl my-5">Formulaire de connexion</h1>
@@ -58,6 +61,7 @@ function Login() {
             placeholder="Email"
             required
             onChange={(event) => setEmail(event.target.value)}
+            autoComplete="username"
           />
         </label>
 
@@ -68,11 +72,12 @@ function Login() {
             placeholder="Mot de passe"
             required
             onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
           />
         </label>
-        <a className="link text-end text-sm" href="/password/reset">
+        <Link className="link text-end text-sm" href="/password/reset">
           Réinitialisation mot de passe
-        </a>
+        </Link>
         <button className="btn text-white bg-[var(--color-1)]" type="submit">
           Connexion
         </button>
