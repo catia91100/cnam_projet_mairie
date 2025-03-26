@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from pydantic import ValidationError
 from utils.utils import generate_psw, send_email, generate_token, hash_password, decode_token_custom
 from dtos.user_dto import UserDTO, user_to_dto
-from services.user_service import insert_user, verify_login, get_user_by_email, update_login_at
+from services.user_service import insert_user, verify_login, get_user_by_email, update_login_at, update_user
 from services.token_service import insert_token, delete_token, delete_expired_tokens, check_token_exists
 from datetime import datetime, timezone
 import hashlib, uuid
@@ -91,7 +91,7 @@ class Security:
 
     @staticmethod
     @security_blueprint.route('/validation-email', methods=['GET'])
-    def validate_token():
+    def validate_email():
         try:
             # Récupérer le token depuis l'URL
             token = request.args.get('token')
@@ -289,7 +289,7 @@ class Security:
                 'details': str(e)
             }), 500
 
-    @security_blueprint.route('/reset_request', methods=['GET'])
+    @security_blueprint.route('/reset-request', methods=['GET'])
     @jwt_required()
     def reset_request():
         try:
@@ -362,7 +362,169 @@ class Security:
                 'details': str(e)
             }), 500
 
-    @security_blueprint.route('/set-password', methods=['GET'])
+    @security_blueprint.route('/validation-password', methods=['POST'])
+    # @jwt_required()
+    def validation_token_password():
+        # faire vérification du token
+
+        data: dict = request.json
+        token: str = data['token']
+        token_dto = check_token_exists(token)
+        if not token_dto:
+            return jsonify({'error': 'Invalid or expired token'}), 400
+
+        # Supprimer le token après utilisation avec delete_token
+        delete_token(token)
+
+        # Décoder le token avec le salt
+        try:
+            decoded_token = decode_token_custom(token, token_dto.salt)
+            email = decoded_token.get('sub')
+            if not email:
+                return jsonify({'error': 'Invalid token'}), 400
+
+            # Vérifier la correspondance avec l'email hashé stocké dans le token (data)
+            email_hash = hashlib.sha256(email.encode()).hexdigest()
+            if email_hash != token_dto.data:
+                return jsonify({'error': 'Invalid email hash'}), 400
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 400
+
+        # Générer un nouveau token valide pour 1 heure en utilisant generate_token
+
+        salt = str(uuid.uuid4())  # Générer un salt unique
+
+        new_token = generate_token(email, expiration_hours=1, salt=salt)
+        new_token_dto: TokenDTO = TokenDTO(token=new_token,
+                                           data=email_hash,
+                                           salt=salt)
+
+        # Sauvegarder le nouveau token en base de données
+        insert_token(new_token_dto)
+
+        # Retourner la réponse JSON avec le nouveau token
+        return jsonify({
+            'verification': True,
+            'token': new_token_dto.token
+        }), 200
+        # return jsonify({"token": "kjhjkkh", "email": "email"}), 200
+
+    @security_blueprint.route('/set-password', methods=['GET', 'POST'])
     # @jwt_required()
     def set_password():
-        return jsonify({"uyuy": "kjhjkkh"}), 200
+
+        if request.method == 'GET':
+            token: str = request.args.get('token')
+            token_dto = check_token_exists(token)
+            if not token_dto:
+                return jsonify({'error': 'Invalid or expired token'}), 400
+
+            # Décoder le token avec le salt
+            try:
+                decoded_token = decode_token_custom(token, token_dto.salt)
+                email = decoded_token.get('sub')
+                if not email:
+                    return jsonify({'error': 'Invalid token'}), 400
+
+                # Vérifier la correspondance avec l'email hashé stocké dans le token (data)
+                email_hash = hashlib.sha256(email.encode()).hexdigest()
+                if email_hash != token_dto.data:
+                    return jsonify({'error': 'Invalid email hash'}), 400
+
+            except Exception as e:
+                return jsonify({'error': str(e)}), 400
+
+            # Générer un nouveau token valide pour 1 heure en utilisant generate_token
+
+            salt = str(uuid.uuid4())  # Générer un salt unique
+
+            new_token = generate_token(email, expiration_hours=1, salt=salt)
+            new_token_dto: TokenDTO = TokenDTO(token=new_token,
+                                               data=email_hash,
+                                               salt=salt)
+
+            # Sauvegarder le nouveau token en base de données
+
+            delete_token(token)
+            insert_token(new_token_dto)
+            delete_expired_tokens()
+
+            # Retourner la réponse JSON avec le nouveau token
+            return jsonify({
+                'verification': True,
+                'token': new_token_dto.token
+            }), 200
+        else:
+            data: dict = request.json
+            token_dto = check_token_exists(data['token'])
+            if not token_dto:
+                return jsonify({'error': 'Invalid or expired token'}), 400
+
+            try:
+                decoded_token = decode_token_custom(data['token'],
+                                                    token_dto.salt)
+                email = decoded_token.get('sub')
+                if not email:
+                    return jsonify({'error': 'Invalid token'}), 400
+
+                # Vérifier la correspondance avec l'email hashé stocké dans le token (data)
+                email_hash = hashlib.sha256(email.encode()).hexdigest()
+                if email_hash != token_dto.data:
+                    return jsonify({'error': 'Invalid email hash'}), 400
+
+                user: User = get_user_by_email(email)
+                user._password = data['password']
+                user_dto: UserDTO = user_to_dto(user)
+                delete_token(data['token'])
+                update_user(email, user_dto)
+            except Exception as e:
+                return jsonify({'error': str(e)}), 400
+
+            return jsonify({
+                "email": email,
+                "success": "Password changed successfully."
+            }), 200
+
+        # faire vérification du token
+
+        token: str = data['token']
+        token_dto = check_token_exists(token)
+        if not token_dto:
+            return jsonify({'error': 'Invalid or expired token'}), 400
+
+        # Supprimer le token après utilisation avec delete_token
+
+        # Décoder le token avec le salt
+        try:
+            decoded_token = decode_token_custom(token, token_dto.salt)
+            email = decoded_token.get('sub')
+            if not email:
+                return jsonify({'error': 'Invalid token'}), 400
+
+            # Vérifier la correspondance avec l'email hashé stocké dans le token (data)
+            email_hash = hashlib.sha256(email.encode()).hexdigest()
+            if email_hash != token_dto.data:
+                return jsonify({'error': 'Invalid email hash'}), 400
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 400
+
+        # Générer un nouveau token valide pour 1 heure en utilisant generate_token
+
+        salt = str(uuid.uuid4())  # Générer un salt unique
+
+        new_token = generate_token(email, expiration_hours=1, salt=salt)
+        new_token_dto: TokenDTO = TokenDTO(token=new_token,
+                                           data=email_hash,
+                                           salt=salt)
+
+        # Sauvegarder le nouveau token en base de données
+        insert_token(new_token_dto)
+
+        # Retourner la réponse JSON avec le nouveau token
+        return jsonify({
+            'verification': True,
+            'token': new_token_dto.token
+        }), 200
+        # return jsonify({"token": "kjhjkkh", "email": "email"}), 200

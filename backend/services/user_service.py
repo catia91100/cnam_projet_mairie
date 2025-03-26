@@ -87,6 +87,8 @@ def get_user_by_email(email: str) -> User:
         # Recherche de l'utilisateur par email
         user = session.query(User).filter_by(_email=email).first()
 
+        user._password = None
+
         return user  # Retourne l'utilisateur trouvé, ou None si pas trouvé.
 
     except Exception as e:

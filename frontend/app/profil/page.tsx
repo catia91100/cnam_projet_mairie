@@ -8,6 +8,7 @@ import Link from "next/link";
 function Profil() {
   const [data, setData] = useState(null);
   const [token, setToken] = useState(null);
+  const [showAlert, setShowAlert] = useState(false); // Gère l'affichage de l'infobulle
   const searchParams = useSearchParams(); // Pour récupérer les paramètres de l'URL
 
   useEffect(() => {
@@ -43,6 +44,22 @@ function Profil() {
     }
   }, [token]);
 
+  // Récupérer les paramètres success et new_email de l'URL
+  const successMessage = searchParams.get("success");
+  const newEmailMessage = searchParams.get("new_email");
+
+  // Affiche l'alerte si un message est présent
+  useEffect(() => {
+    if (successMessage || newEmailMessage) {
+      setShowAlert(true);
+      const timer = setTimeout(() => {
+        setShowAlert(false);
+      }, 5000); // Disparition après 5 secondes
+
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, newEmailMessage]);
+
   if (data === null) {
     return (
       <main className="flex justify-center items-center">
@@ -53,12 +70,9 @@ function Profil() {
 
   let user = data; // Utilisation directe des données retournées
 
-  // Récupérer les paramètres success et new_email de l'URL
-  const successMessage = searchParams.get("success");
-  const newEmailMessage = searchParams.get("new_email");
   return (
-    <main className="grid gap-6 lg:grid-cols-6s lg:mx-40 lg:my-20 relative p-6 bg-white shadow-md rounded-lg">
-      <div className="relative space-y-6 max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
+    <main className="grid gap-6 lg:grid-cols-4 lg:mx-40 lg:my-20 p-6 relative">
+      <div className="col-start-2 col-span-2 w-full space-y-6 max-w-lgs mx-auto p-6 bg-white shadow-md rounded-lg">
         <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
           Profil
         </h1>
@@ -68,11 +82,9 @@ function Profil() {
             <div className="flex justify-between items-center">
               <span className="font-semibold text-gray-700">Email :</span>
               {user.role === "ROLE_ADMIN" && (
-                // <div className="grid grid-cols-4 items-center lg:col-span-3">
                 <span className="badge badge-primary col-span-3 rounded-full">
                   Admin
                 </span>
-                // </div>
               )}
             </div>
             <input
@@ -139,7 +151,7 @@ function Profil() {
             />
           </label>
         </div>
-        <div>
+        <div className="flex">
           <Link
             className="btn text-white bg-[var(--color-1)] w-full max-w-xs mx-auto mt-8 p-3 rounded-full"
             href={"/profil/edit"}
@@ -148,9 +160,9 @@ function Profil() {
           </Link>
         </div>
 
-        {/* Infobulle conditionnelle */}
-        {(successMessage || newEmailMessage) && (
-          <div className="alert alert-info mb-6 absolute -top-7 mt-10 lg:mt-0 rounded-full">
+        {/* Infobulle conditionnelle avec disparition après 5 secondes */}
+        {showAlert && (
+          <div className="alert alert-info mb-6 absolute -top-7 mt-10 lg:mt-0 rounded-full left-8">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
