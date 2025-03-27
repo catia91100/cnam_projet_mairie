@@ -289,20 +289,19 @@ class Security:
                 'details': str(e)
             }), 500
 
-    @security_blueprint.route('/reset-request', methods=['GET'])
-    @jwt_required()
-    def reset_request():
+    @security_blueprint.route('/reset-request/<string:email>', methods=['GET'])
+    # @jwt_required()
+    def reset_request(email: str):
         try:
             # Récupérer les données du corps de la requête
-            email: str = get_jwt_identity()
+            # email: str = get_jwt_identity()
+
+            UserDTO(email=email)
 
             # Vérifier si un utilisateur existe déjà avec cet email
             user: User = get_user_by_email(email)
             if not user:
-                raise ValidationError()
-
-            # Générer un mot de passe si nécessaire
-            # data['password'] = generate_psw()
+                return jsonify({'email': "user_dto.email"}), 200
 
             # Validation Pydantic du DTO
             user_dto: UserDTO = user_to_dto(user)
@@ -332,7 +331,7 @@ class Security:
             insert_token(token_dto)
 
             # Générer l'URL de validation avec le token
-            validation_url = f"{current_app.config['BASE_URL']}/set-password?token={token_dto.token}"
+            validation_url = f"{current_app.config['BASE_URL']}/password/set?token={token_dto.token}"
 
             # Dictionnaire des variables pour le template
             context = {

@@ -6,71 +6,64 @@ import GetCookie from "@/app/_fct/GetCookie";
 import { faX, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import API_URL from "@/app/config";
+
 import Link from "next/link";
 
 function page() {
   const [user, setUser] = useState(null);
+  const [profils, setProfils] = useState([]);
   const modalRef = useRef(null);
   const [selectedProfil, setSelectedProfil] = useState(null);
+  const [token, setToken] = useState(null);
+  const[data, setData] = useState();
 
   useEffect(() => {
     if (GetCookie({ name: "user" })) {
-      setUser(JSON.parse(decodeURIComponent(GetCookie({ name: "user" }))));
+      let cookie = JSON.parse(decodeURIComponent(GetCookie({ name: "user" })));
+      setToken(cookie.token);
     } else {
       return redirect("/");
     }
   }, []);
 
-  if (user === null) {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${API_URL}/account/all`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setProfils(data.users);
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      }
+    };
+
+    if (token) {
+      fetchData();
+    }
+  }, [token]);
+
+  if (profils === null) {
     return (
       <main className="flex justify-center items-center">
         <span className="loading loading-dots loading-lg"></span>
       </main>
     );
   }
-  const profils = [
-    {
-      firstName: "admin",
-      lastName: "adminjr",
-      email: "admin@gmail.com",
-      birthAt: "1990-01-01",
-      loginAt: "2025-02-10",
-      createdAt: "2025-01-10",
-      role: "admin",
-    },
-    {
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      birthAt: "1985-05-15",
-      loginAt: "2025-02-09",
-      createdAt: "2025-01-05",
-      role: "user",
-    },
-    {
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane.smith@example.com",
-      birthAt: "1992-08-22",
-      loginAt: "2025-02-08",
-      createdAt: "2025-01-02",
-      role: "user",
-    },
-    {
-      firstName: "Alice",
-      lastName: "Johnson",
-      email: "alice.johnson@example.com",
-      birthAt: "1988-11-30",
-      loginAt: "2025-02-07",
-      createdAt: "2025-01-01",
-      role: "user",
-    },
-  ];
 
   function openModal(data) {
     setSelectedProfil(data);
     modalRef.current.showModal();
   }
+
   return (
     <main className="flex justify-center items-center flex-col">
       <h1 className="text-2xl my-2">Profils</h1>
@@ -92,49 +85,31 @@ function page() {
             {profils.map((item, key) => (
               <tr key={key} onClick={() => openModal(item)}>
                 <td>{item.email}</td>
-                <td className="hidden md:table-cell">{item.firstName}</td>
-                <td className="hidden md:table-cell">{item.lastName}</td>
-                <td className="hidden lg:table-cell">{item.birthAt}</td>
-                <td className="hidden lg:table-cell">{item.loginAt}</td>
-                <td className="hidden lg:table-cell">{item.createdAt}</td>
-                <td className="hidden md:table-cell">{item.role}</td>
+                <td className="hidden md:table-cell">{item.firstname}</td>
+                <td className="hidden md:table-cell">{item.lastname}</td>
+                <td className="hidden lg:table-cell">
+                  {new Date(item.birth_at).toLocaleDateString()}
+                </td>
+                <td className="hidden lg:table-cell">
+                  {new Date(item.login_at).toLocaleDateString()}
+                </td>
+                <td className="hidden lg:table-cell">
+                  {new Date(item.created_at).toLocaleDateString()}
+                </td>
+                <td className="hidden md:table-cell">{item.role || "N/A"}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        {/* <button className="btn" onClick={}>
-          open modal
-        </button> */}
+
+        {/* Modal */}
         <dialog id="my_modal_4" className="modal fixe" ref={modalRef}>
           <div className="modal-box max-h-screen">
             <div className="modal-action mt-0">
-              {/* <form method="dialog"> */}
               {selectedProfil !== null ? (
-                // <div className="grid gap-3 lg:grid-cols-6 lg:mx-40 lg:my-20s">
                 <div className="grid gap-2 md:grid-cols-2">
-                  {selectedProfil.newEmail && (
-                    <div role="alert" className="alert alert-info">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        className="h-6 w-6 shrink-0 stroke-current"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        ></path>
-                      </svg>
-                      <span>
-                        Un mail vous a été envoyé à l'adresse{" "}
-                        {selectedProfil.newEmail} pour la valider.
-                      </span>
-                    </div>
-                  )}
                   <div className="">
-                    <span className="">Email :</span>
+                    <span>Email :</span>
                     <label className="input input-bordered flex items-center gap-2">
                       <input
                         type="text"
@@ -145,71 +120,77 @@ function page() {
                     </label>
                   </div>
                   <div className="">
-                    <span className="">Nom :</span>
+                    <span>Nom :</span>
                     <label className="input input-bordered flex items-center gap-2">
                       <input
                         type="text"
                         className="grow"
-                        value={selectedProfil.firstName}
+                        value={selectedProfil.firstname}
                         disabled
                       />
                     </label>
                   </div>
                   <div className="">
-                    <span className="">Prénom :</span>
+                    <span>Prénom :</span>
                     <label className="input input-bordered flex items-center gap-2">
                       <input
                         type="text"
                         className="grow"
-                        value={selectedProfil.lastName}
+                        value={selectedProfil.lastname}
                         disabled
                       />
                     </label>
                   </div>
                   <div className="">
-                    <span className="">Date de naissance :</span>
+                    <span>Date de naissance :</span>
                     <label className="input input-bordered flex items-center gap-2">
                       <input
                         type="date"
                         className="grow"
-                        value={selectedProfil.birthAt}
+                        value={new Date(
+                          selectedProfil.birth_at
+                        ).toLocaleDateString("en-CA")}
                         disabled
                       />
                     </label>
                   </div>
                   <div className="">
-                    <span className="">Date de création :</span>
+                    <span>Date de création :</span>
                     <label className="input input-bordered flex items-center gap-2">
                       <input
                         type="date"
                         className="grow"
-                        value={selectedProfil.createdAt}
+                        value={new Date(
+                          selectedProfil.created_at
+                        ).toLocaleDateString("en-CA")}
                         disabled
                       />
                     </label>
                   </div>
                   <div className="">
-                    <span className="">Dernière connexion :</span>
+                    <span>Dernière connexion :</span>
                     <label className="input input-bordered flex items-center gap-2">
                       <input
                         type="date"
                         className="grow"
-                        value={selectedProfil.loginAt}
+                        value={new Date(
+                          selectedProfil.login_at
+                        ).toLocaleDateString("en-CA")}
                         disabled
                       />
                     </label>
                   </div>
                   <Link
-                    className="btn text-white bg-[var(--color-1)] md:col-span-2j"
+                    className="btn text-white bg-[var(--color-1)] md:col-span-2"
                     href={{
                       pathname: "/admin/profils/edit",
                       query: {
-                        firstName: selectedProfil.firstName,
-                        lastName: selectedProfil.lastName,
+                        firstName: selectedProfil.firstname,
+                        lastName: selectedProfil.lastname,
                         email: selectedProfil.email,
-                        birthAt: selectedProfil.birthAt,
-                        loginAt: selectedProfil.loginAt,
-                        createdAt: selectedProfil.createdAt,
+                        birthAt: selectedProfil.birth_at,
+                        loginAt: selectedProfil.login_at,
+                        createdAt: selectedProfil.created_at,
                         role: selectedProfil.role,
                       },
                     }}
@@ -238,7 +219,6 @@ function page() {
               >
                 <FontAwesomeIcon icon={faX} className="fa-xs" />
               </button>
-              {/* </form> */}
             </div>
           </div>
         </dialog>
@@ -246,4 +226,5 @@ function page() {
     </main>
   );
 }
+
 export default page;

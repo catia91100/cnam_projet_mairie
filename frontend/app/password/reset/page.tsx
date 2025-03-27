@@ -21,7 +21,7 @@ function ResetPasswordRequest() {
       }
 
       setSuccess(true);
-    } catch (err) {
+    } catch () {
       setError("Impossible d'envoyer la demande. Vérifiez votre email.");
     }
   };

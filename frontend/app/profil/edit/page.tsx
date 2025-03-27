@@ -75,7 +75,7 @@ function ProfilEdit() {
     e.preventDefault();
 
     // Ajoutez l'email modifié au body si nécessaire
-    let userNew = {
+    const userNew = {
       email: handleUser.email || user.email, // Si l'email est modifié, il est inclus
       birth_at: handleUser.birth_at,
       firstname: handleUser.firstname || user.firstname,
@@ -97,11 +97,11 @@ function ProfilEdit() {
       }
 
       const data = await response.json();
-      const message =
-        data.success === "User updated successfully" ||
-        data.success === "No changes to update."
-          ? "User updated successfully"
-          : "Error updating user";
+      // const message =
+      //   data.success === "User updated successfully" ||
+      //   data.success === "No changes to update."
+      //     ? "User updated successfully"
+      //     : "Error updating user";
 
       // Si data contient 'new_email', rediriger vers profil avec le nouvel email
       if (data.user.new_email) {

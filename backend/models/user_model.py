@@ -56,7 +56,7 @@ class User(Base):
     def __repr__(self):
 
         return (
-            f'<User(email={self.get_email()},role={self.get_role()}, firstname={self.get_firstname()}, '
-            f'lastname={self.get_lastname()}, birth_at={self.get_birth_at()}, '
-            f'created_at={self.get_created_at()}, login_at={self.get_login_at()}, password={self.get_password()})>'
+            f'<User(email={self._email()},role={self._role()}, firstname={self._firstname()}, '
+            f'lastname={self._lastname()}, birth_at={self._birth_at()}, '
+            f'created_at={self._created_at()}, login_at={self._login_at()}, password={self._password()})>'
         )

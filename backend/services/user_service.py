@@ -99,6 +99,33 @@ def get_user_by_email(email: str) -> User:
         session.close()  # Assurez-vous de fermer la session à la fin
 
 
+def get_user_all() -> list[User]:
+    """Récupère un utilisateur de la base de données en fonction de son email.
+    
+    Args:
+        email (str): L'email de l'utilisateur à récupérer.
+    
+    Returns:
+        User: L'utilisateur trouvé ou None si l'utilisateur n'existe pas.
+    """
+    session = create_session_local()  # Créer une session locale
+    try:
+        # Recherche de l'utilisateur par email
+        users: list[User] = session.query(User).all()
+
+        for user in users:
+            user._password = None
+
+        return users  # Retourne l'utilisateur trouvé, ou None si pas trouvé.
+
+    except Exception as e:
+        print(f"Erreur lors de la récupération de l'utilisateur : {str(e)}")
+        return None
+
+    finally:
+        session.close()  # Assurez-vous de fermer la session à la fin
+
+
 def update_user(email: str, user_dto: UserDTO) -> User:
     """Met à jour les informations d'un utilisateur à partir d'un DTO.
 

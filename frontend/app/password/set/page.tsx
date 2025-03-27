@@ -7,7 +7,6 @@ import GetCookie from "@/app/_fct/GetCookie";
 function SetPassword() {
   const router = useRouter();
   const [message, setMessage] = useState(false);
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordRepeat, setPasswordRepeat] = useState("");
   const [passwordErrors, setPasswordErrors] = useState([]); // Stocke les erreurs de validation
