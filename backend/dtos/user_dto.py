@@ -30,7 +30,6 @@ class UserDTO(BaseModel):
     def validate_password(cls, instance):
         """Validation avancée du mot de passe après l'instanciation"""
         password = instance.password
-        print(password, 'kdsofllllllllllllllllllllu')
         if password:  # Vérifie si le mot de passe est défini
             if not re.search(r"[A-Z]", password):
                 raise ValueError(

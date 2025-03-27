@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from services.user_service import get_user_by_email, update_user, update_user_email  # Assuming this function is in services/user_service.py
+from services.user_service import get_user_by_email, update_user, update_user_email, get_user_all  # Assuming this function is in services/user_service.py
 from dtos.user_dto import user_to_dto  # Assuming this function is in dtos/user_dto.py
 from services.token_service import check_token_exists, delete_token, delete_expired_tokens, insert_token
 from utils.utils import generate_token, send_email, decode_token_custom
@@ -33,6 +33,32 @@ class Account:
             # Convertir les données de l'utilisateur en DTO et les retourner en JSON
             user_dto = user_to_dto(user)
             return jsonify(user_dto.to_dict()), 200
+
+        except Exception as e:
+            return jsonify({
+                'error': 'An unexpected error occurred',
+                'details': str(e)
+            }), 500
+
+    @staticmethod
+    @account_blueprint.route('all', methods=['GET'])
+    @jwt_required()  # Protect the route with JWT authentication
+    def get_all():
+        try:
+            # Récupérer l'email de l'utilisateur depuis le JWT
+            # email = get_jwt_identity()
+
+            # Utiliser l'email pour récupérer les données de l'utilisateur
+            users: list = get_user_all()
+            # print(users)
+            # if not users:
+            #     return jsonify({'error': 'User not found'}), 404
+
+            # # Convertir les données de l'utilisateur en DTO et les retourner en JSON
+            for x in range(len(users)):
+                users[x] = user_to_dto(users[x])
+                users[x] = users[x].to_dict()
+            return jsonify({"users": users}), 200
 
         except Exception as e:
             return jsonify({
@@ -246,16 +272,16 @@ class Account:
             # Sauvegarder les changements en base de données
             user: User = update_user(email, user_dto)
 
-            update_user_dto: UserDTO = user_to_dto(user)
+            # update_user_dto: UserDTO = user_to_dto(user)
 
-            user_dict: dict = update_user_dto.to_dict()
+            # user_dict: dict = update_user_dto.to_dict()
 
-            if new_email:
-                user_dict['new_email'] = new_email
+            # # if new_email:
+            # #     user_dict['new_email'] = new_email
 
             return jsonify({
                 'success': 'User updated successfully',
-                'user': user_dict
+                'user': "user_dict"
                 # 'email_verification_token':
                 # token  # Retourner le token si généré
             }), 200

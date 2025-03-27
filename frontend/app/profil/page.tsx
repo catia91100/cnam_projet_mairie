@@ -7,9 +7,9 @@ import Link from "next/link";
 
 function Profil() {
   const [data, setData] = useState(null);
-  const [token, setToken] = useState(null);
   const [showAlert, setShowAlert] = useState(false); // Gère l'affichage de l'infobulle
   const searchParams = useSearchParams(); // Pour récupérer les paramètres de l'URL
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
     if (GetCookie({ name: "user" })) {
