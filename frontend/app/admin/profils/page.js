@@ -10,17 +10,17 @@ import API_URL from "@/app/config";
 
 import Link from "next/link";
 
-function page() {
-  const [user, setUser] = useState(null);
+function Page() {
+  // const [user, setUser] = useState(null);
   const [profils, setProfils] = useState([]);
   const modalRef = useRef(null);
   const [selectedProfil, setSelectedProfil] = useState(null);
   const [token, setToken] = useState(null);
-  const[data, setData] = useState();
+  // const[data, setData] = useState();
 
   useEffect(() => {
-    if (GetCookie({ name: "user" })) {
-      let cookie = JSON.parse(decodeURIComponent(GetCookie({ name: "user" })));
+    if (GetCookie("user")) {
+      const cookie = JSON.parse(decodeURIComponent(GetCookie("user")));
       setToken(cookie.token);
     } else {
       return redirect("/");
@@ -227,4 +227,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

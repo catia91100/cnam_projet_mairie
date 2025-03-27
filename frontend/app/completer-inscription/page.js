@@ -1,7 +1,8 @@
 "use client";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import API_URL from "@/config";
+import API_URL from "../config";
+import { Suspense } from "react";
 
 function CompleterInscription() {
   const params = useSearchParams();
@@ -111,12 +112,15 @@ function CompleterInscription() {
       const data = await response.json();
       if (response.ok) {
         alert();
-        const encodedMessage = encodeURIComponent("Inscription complétée avec succès !");
+        const encodedMessage = encodeURIComponent(
+          "Inscription complétée avec succès !"
+        );
         router.push(`/login?success=${encodedMessage}`);
       } else {
         setErrorMessage(data.message || "Une erreur est survenue.");
       }
     } catch (err) {
+      console.log(err);
       setErrorMessage("Impossible de contacter le serveur.");
     }
   };
@@ -221,4 +225,14 @@ function CompleterInscription() {
   );
 }
 
-export default CompleterInscription;
+// export default CompleterInscription;
+
+function Page() {
+  return (
+    <Suspense fallback={<p>Chargement...</p>}>
+      <CompleterInscription />
+    </Suspense>
+  );
+}
+
+export default Page;

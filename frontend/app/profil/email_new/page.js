@@ -3,6 +3,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import API_URL from "@/app/config";
+import { Suspense } from "react";
 
 function EmailNew() {
   const searchParams = useSearchParams();
@@ -42,11 +43,7 @@ function EmailNew() {
   }, [data, router]);
 
   if (!data || Object.keys(data).length === 0) {
-    return (
-      <main className="flex justify-center items-center">
-        <span className="loading loading-dots loading-lg"></span>
-      </main>
-    );
+    return;
   }
 
   return (
@@ -59,4 +56,20 @@ function EmailNew() {
   );
 }
 
-export default EmailNew;
+import React from "react";
+
+function Page() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex justify-center items-center">
+          <span className="loading loading-dots loading-lg"></span>
+        </main>
+      }
+    >
+      <EmailNew />
+    </Suspense>
+  );
+}
+
+export default Page;

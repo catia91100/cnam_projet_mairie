@@ -1,10 +1,11 @@
 "use client";
 import { useState } from "react";
-import API_URL from "@/app/config";
+import API_URL from "../config";
 import { useSearchParams } from "next/navigation";
-import ClearURL from "@/app/components/ClearURL";
-import GetCookie from "../_fct/GetCookie";
-import { useRouter } from "next/navigation";
+import ClearURL from "../components/ClearURL";
+// import GetCookie from "../_fct/GetCookie";
+// import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 import Link from "next/link";
 
 function Login() {
@@ -39,6 +40,7 @@ function Login() {
         setErrorMessage(data.message || "Email ou mot de passe incorrect!");
       }
     } catch (error) {
+      console.log(error);
       setErrorMessage("Une erreur est survenue lors de la connexion.");
     }
   };
@@ -104,4 +106,12 @@ function Login() {
   );
 }
 
-export default Login;
+function Page() {
+  return (
+    <Suspense fallback={<p>Chargement...</p>}>
+      <Login />
+    </Suspense>
+  );
+}
+
+export default Page;

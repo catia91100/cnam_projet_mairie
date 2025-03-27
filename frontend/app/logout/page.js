@@ -1,13 +1,13 @@
 "use client"; // Ensures this is a client component
 
-import { useEffect, useState } from "react";
+import { useEffect} from "react";
 // import { useRouter } from "next/navigation";
 import GetCookie from "../_fct/GetCookie";
-import { redirect } from "next/navigation";
+// import { redirect } from "next/navigation";
 
 function Page() {
   // const router = useRouter();
-  const [shouldRedirect, setShouldRedirect] = useState(false);
+  // const [shouldRedirect, setShouldRedirect] = useState(false);
 
   useEffect(() => {
     const value = GetCookie({ name: "user" });
@@ -20,9 +20,9 @@ function Page() {
     }
   }, []);
 
-  if (shouldRedirect) {
-    redirect("/");
-  }
+  // if (shouldRedirect) {
+  //   redirect("/");
+  // }
 
   return (
     <main>

@@ -7,7 +7,7 @@ function ResetPasswordRequest() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -21,7 +21,8 @@ function ResetPasswordRequest() {
       }
 
       setSuccess(true);
-    } catch () {
+    } catch (e) {
+      console.log(e)
       setError("Impossible d'envoyer la demande. Vérifiez votre email.");
     }
   };

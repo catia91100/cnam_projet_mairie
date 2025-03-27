@@ -13,12 +13,11 @@ function ProfilEdit() {
   const router = useRouter();
 
   useEffect(() => {
-    const cookieStr = GetCookie({ name: "user" });
-    if (cookieStr) {
-      const cookie = JSON.parse(decodeURIComponent(cookieStr));
+    if (GetCookie("user")) {
+      const cookie = JSON.parse(decodeURIComponent(GetCookie("user")));
       setToken(cookie.token);
     } else {
-      router.push("/"); // Redirection si le cookie n'est pas trouvé
+      router.push('/');
     }
   }, [router]);
 

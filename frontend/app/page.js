@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import Image from "next/image";
 
 function Page() {
   const slides = [
@@ -66,15 +67,18 @@ function Page() {
       order: 0,
     },
   ];
-  useEffect(()=>{
+
+  // Convertir categories en chaîne JSON pour être utilisé dans useEffect
+  const categoriesString = JSON.stringify(categories);
+
+  useEffect(() => {
     const today = new Date(Date.now());
     today.setHours(today.getHours() + 1);
     document.cookie =
-      `categories=${encodeURIComponent(JSON.stringify(categories))}; expires=` +
+      `categories=${encodeURIComponent(categoriesString)}; expires=` +
       today.toUTCString() +
       "; path=/";
-  },[])
-
+  }, [categoriesString]); // Utiliser categoriesString comme dépendance
 
   // fin ajoute les catégories aux cookies
 
@@ -86,7 +90,14 @@ function Page() {
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
           {slides.map((src, index) => (
-            <img key={index} src={src} className="w-full flex-shrink-0" />
+            <Image
+              key={index}
+              src={src}
+              className="w-full flex-shrink-0"
+              width={1200}
+              height={600}
+              alt="alternativ"
+            />
           ))}
         </div>
         <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
@@ -127,9 +138,11 @@ function Page() {
         <h2 className="text-xl text-center">Actualités</h2>
         <div className=" h-screen overflow-y-scroll grid gap-2 p-8">
           <div className="bg-secondary h-max lg:h-48 rounded w-full grid lg:grid-cols-6 overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out shadow-lg">
-            <img
+            <Image
               src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp"
               alt=""
+              width={300}
+              height={300}
               className="object-cover h-40 lg:h-full row-start-1 row-end-3 lg:row-start-1 lg:row-end-2 lg:col-span-2"
             />
             <div className="row-start-3 row-end-6 lg:row-start-1 lg:row-end-2 lg:col-span-4 p-5">
@@ -144,9 +157,11 @@ function Page() {
             </div>
           </div>
           <div className="bg-secondary h-max lg:h-48 rounded w-full grid lg:grid-cols-6 overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out shadow-lg">
-            <img
+            <Image
               src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp"
               alt=""
+              width={300}
+              height={300}
               className="object-cover h-40 lg:h-full row-start-1 row-end-3 lg:row-start-1 lg:row-end-2 lg:col-span-2"
             />
             <div className="row-start-3 row-end-6 lg:row-start-1 lg:row-end-2 lg:col-span-4 p-5">
@@ -161,9 +176,11 @@ function Page() {
             </div>
           </div>
           <div className="bg-secondary h-max lg:h-48 rounded w-full grid lg:grid-cols-6 overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out shadow-lg">
-            <img
+            <Image
               src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp"
               alt=""
+              width={300}
+              height={300}
               className="object-cover h-40 lg:h-full row-start-1 row-end-3 lg:row-start-1 lg:row-end-2 lg:col-span-2"
             />
             <div className="row-start-3 row-end-6 lg:row-start-1 lg:row-end-2 lg:col-span-4 p-5">
@@ -178,9 +195,11 @@ function Page() {
             </div>
           </div>
           <div className="bg-secondary h-max lg:h-48 rounded w-full grid lg:grid-cols-6 overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out shadow-lg">
-            <img
+            <Image
               src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp"
               alt=""
+              width={300}
+              height={300}
               className="object-cover h-40 lg:h-full row-start-1 row-end-3 lg:row-start-1 lg:row-end-2 lg:col-span-2"
             />
             <div className="row-start-3 row-end-6 lg:row-start-1 lg:row-end-2 lg:col-span-4 p-5">
@@ -195,9 +214,11 @@ function Page() {
             </div>
           </div>
           <div className="bg-secondary h-max lg:h-48 rounded w-full grid lg:grid-cols-6 overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out shadow-lg">
-            <img
+            <Image
               src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp"
               alt=""
+              width={300}
+              height={300}
               className="object-cover h-40 lg:h-full row-start-1 row-end-3 lg:row-start-1 lg:row-end-2 lg:col-span-2"
             />
             <div className="row-start-3 row-end-6 lg:row-start-1 lg:row-end-2 lg:col-span-4 p-5">
@@ -212,9 +233,11 @@ function Page() {
             </div>
           </div>
           <div className="bg-secondary h-max lg:h-48 rounded w-full grid lg:grid-cols-6 overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out shadow-lg">
-            <img
+            <Image
               src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp"
               alt=""
+              width={300}
+              height={300}
               className="object-cover h-40 lg:h-full row-start-1 row-end-3 lg:row-start-1 lg:row-end-2 lg:col-span-2"
             />
             <div className="row-start-3 row-end-6 lg:row-start-1 lg:row-end-2 lg:col-span-4 p-5">
@@ -229,9 +252,11 @@ function Page() {
             </div>
           </div>
           <div className="bg-secondary h-max lg:h-48 rounded w-full grid lg:grid-cols-6 overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out shadow-lg">
-            <img
+            <Image
               src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp"
               alt=""
+              width={300}
+              height={300}
               className="object-cover h-40 lg:h-full row-start-1 row-end-3 lg:row-start-1 lg:row-end-2 lg:col-span-2"
             />
             <div className="row-start-3 row-end-6 lg:row-start-1 lg:row-end-2 lg:col-span-4 p-5">
@@ -246,9 +271,11 @@ function Page() {
             </div>
           </div>
           <div className="bg-secondary h-max lg:h-48 rounded w-full grid lg:grid-cols-6 overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out shadow-lg">
-            <img
+            <Image
               src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp"
               alt=""
+              width={300}
+              height={300}
               className="object-cover h-40 lg:h-full row-start-1 row-end-3 lg:row-start-1 lg:row-end-2 lg:col-span-2"
             />
             <div className="row-start-3 row-end-6 lg:row-start-1 lg:row-end-2 lg:col-span-4 p-5">
@@ -263,9 +290,11 @@ function Page() {
             </div>
           </div>
           <div className="bg-secondary h-max lg:h-48 rounded w-full grid lg:grid-cols-6 overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out shadow-lg">
-            <img
+            <Image
               src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp"
               alt=""
+              width={300}
+              height={300}
               className="object-cover h-40 lg:h-full row-start-1 row-end-3 lg:row-start-1 lg:row-end-2 lg:col-span-2"
             />
             <div className="row-start-3 row-end-6 lg:row-start-1 lg:row-end-2 lg:col-span-4 p-5">
@@ -280,9 +309,11 @@ function Page() {
             </div>
           </div>
           <div className="bg-secondary h-max lg:h-48 rounded w-full grid lg:grid-cols-6 overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out shadow-lg">
-            <img
+            <Image
               src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp"
               alt=""
+              width={300}
+              height={300}
               className="object-cover h-40 lg:h-full row-start-1 row-end-3 lg:row-start-1 lg:row-end-2 lg:col-span-2"
             />
             <div className="row-start-3 row-end-6 lg:row-start-1 lg:row-end-2 lg:col-span-4 p-5">
@@ -297,9 +328,11 @@ function Page() {
             </div>
           </div>
           <div className="bg-secondary h-max lg:h-48 rounded w-full grid lg:grid-cols-6 overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out shadow-lg">
-            <img
+            <Image
               src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp"
               alt=""
+              width={300}
+              height={300}
               className="object-cover h-40 lg:h-full row-start-1 row-end-3 lg:row-start-1 lg:row-end-2 lg:col-span-2"
             />
             <div className="row-start-3 row-end-6 lg:row-start-1 lg:row-end-2 lg:col-span-4 p-5">

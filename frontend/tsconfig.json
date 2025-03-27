@@ -22,7 +22,7 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/layout.tsx", "app/UserMenu.js", "app/page.js", "app/publications/page.js", "app/publications/new/Tiptap.js", "app/publications/new/page.js", "app/publication/page.js", "app/profil/page.js", "app/profil/email_new/page.js", "app/profil/edit/page.js", "app/password/set/page.js", "app/password/reset/page.js", "app/logout/page.js", "app/login/page.js", "app/admin/page.js", "app/admin/profils/page.js", "app/admin/profils/edit/page.js", "app/admin/photos/page.js", "app/admin/category/page.js", "app/admin/calendar/page.js", "app/_fct/GetCookie.js"],
   "exclude": ["node_modules"],
   "moduleResolution": "bundler"
 }

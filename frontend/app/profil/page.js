@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { redirect, useSearchParams } from "next/navigation";
 import API_URL from "@/app/config";
 import Link from "next/link";
+import { Suspense } from "react";
 
 function Profil() {
   const [data, setData] = useState(null);
@@ -12,8 +13,8 @@ function Profil() {
   const [token, setToken] = useState(null);
 
   useEffect(() => {
-    if (GetCookie({ name: "user" })) {
-      const cookie = JSON.parse(decodeURIComponent(GetCookie({ name: "user" })));
+    if (GetCookie("user")) {
+      const cookie = JSON.parse(decodeURIComponent(GetCookie("user")));
       setToken(cookie.token);
     } else {
       return redirect("/");
@@ -68,7 +69,7 @@ function Profil() {
     );
   }
 
-  let user = data; // Utilisation directe des données retournées
+  const user = data; // Utilisation directe des données retournées
 
   return (
     <main className="grid gap-6 lg:grid-cols-4 lg:mx-40 lg:my-20 p-6 relative">
@@ -189,4 +190,20 @@ function Profil() {
   );
 }
 
-export default Profil;
+// import React from 'react';
+
+function Page() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex justify-center items-center">
+          <span className="loading loading-dots loading-lg"></span>
+        </main>
+      }
+    >
+      <Profil />
+    </Suspense>
+  );
+}
+
+export default Page;

@@ -43,25 +43,25 @@ function Page() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    // const today = new Date(Date.now());
-    // today.setHours(today.getHours() + 1);
-    // let userNew = { ...user };
+    const today = new Date(Date.now());
+    today.setHours(today.getHours() + 1);
+    const userNew = { ...user };
 
-    // Object.keys(user).forEach((key) => {
-    //   if (handleUser[key] !== undefined && handleUser[key] !== user[key]) {
-    //     userNew[key] = handleUser[key];
-    //   }
-    // });
+    Object.keys(user).forEach((key) => {
+      if (handleUser[key] !== undefined && handleUser[key] !== user[key]) {
+        userNew[key] = handleUser[key];
+      }
+    });
 
-    // if (handleUser.email !== undefined && handleUser.email !== user.email) {
-    //   userNew.newEmail = userNew.email;
-    //   userNew.email = user.email;
-    // }
+    if (handleUser.email !== undefined && handleUser.email !== user.email) {
+      userNew.newEmail = userNew.email;
+      userNew.email = user.email;
+    }
 
-    // document.cookie =
-    //   `user=${encodeURIComponent(JSON.stringify(userNew))}; expires=` +
-    //   today.toUTCString() +
-    //   "; path=/";
+    document.cookie =
+      `user=${encodeURIComponent(JSON.stringify(userNew))}; expires=` +
+      today.toUTCString() +
+      "; path=/";
 
     router.push("/admin/profils");
   }

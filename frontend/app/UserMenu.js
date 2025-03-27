@@ -10,7 +10,7 @@ function UserMenu() {
       JSON.parse(
         decodeURIComponent(
           GetCookie(
-            { name: "user" }
+            'user'
           )
         )
       )

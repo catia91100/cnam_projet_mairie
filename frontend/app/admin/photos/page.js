@@ -1,11 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { redirect } from "next/navigation";
+// import { redirect } from "next/navigation";
 import GetCookie from "@/app/_fct/GetCookie";
 
-function page() {
+function Page() {
   const [user, setUser] = useState(null);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
+  // const [shouldRedirect, setShouldRedirect] = useState(false);
 
   useEffect(() => {
     if (GetCookie({ name: "user" })) {
@@ -15,9 +15,9 @@ function page() {
     }
   }, []);
 
-  if (shouldRedirect) {
-    redirect("/");
-  }
+  // if (shouldRedirect) {
+  //   redirect("/");
+  // }
 
   if (user === null) {
     return (
@@ -32,4 +32,4 @@ function page() {
     </main>
   );
 }
-export default page;
+export default Page;

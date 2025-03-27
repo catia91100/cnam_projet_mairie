@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import GetCookie from "@/app/_fct/GetCookie";
 
-function page() {
-  const [user, setUser] = useState(null);
+function Page() {
+  // const [user, setUser] = useState(null);
   const [categories, setCategories] = useState(null);
 
   useEffect(() => {
@@ -11,7 +11,7 @@ function page() {
       GetCookie({ name: "categories" }) !== null &&
       GetCookie({ name: "user" }) !== null
     ) {
-      setUser(JSON.parse(decodeURIComponent(GetCookie({ name: "user" }))));
+      // setUser(JSON.parse(decodeURIComponent(GetCookie({ name: "user" }))));
       setCategories(
         JSON.parse(decodeURIComponent(GetCookie({ name: "categories" })))
       );
@@ -77,4 +77,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;
