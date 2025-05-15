@@ -7,5 +7,8 @@
         "activityBar.background": "#093517",
         "titleBar.activeBackground": "#0C4B20",
         "titleBar.activeForeground": "#F3FDF6"
-    }
+    },
+    "python.analysis.extraPaths": [
+        "./backend"
+    ]
 }
