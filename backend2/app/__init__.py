@@ -9,7 +9,15 @@ from .routes.publication import publication_bp
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}}, expose_headers=["Authorization"])
+    CORS(app, 
+     resources={
+         r"/api/*": {
+             "origins": "http://localhost:3000/",
+             "methods": ["GET", "POST", "PUT", "DELETE"],
+             "allow_headers": ["Content-Type", "Authorization"],
+             "supports_credentials": True  # Crucial pour les cookies
+         }
+     })
     # Initialisation des extensions
     db.init_app(app)
     migrate.init_app(app, db)

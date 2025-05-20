@@ -1,11 +1,9 @@
  export async function fetchUserProfile() {
   const token = localStorage.getItem('token');
-console.log('Token:', token);
   const response = await fetch('http://localhost:5000/api/auth/me', {
     method: 'GET',
     headers: {
-      'Authorization': `Bearer ${token}`,
-     
+      Authorization: `Bearer ${token}`,
     },
   });
 

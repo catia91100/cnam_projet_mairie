@@ -1,32 +1,22 @@
  'use client';
 
-import { useEffect, useState } from 'react';
-import { fetchUserProfile } from '@/utils/api';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { isAuthenticated } from '@/utils/auth';
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<{ name: string } | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    async function loadUser() {
-      try {
-        const data = await fetchUserProfile();
-        setUser(data);
-      } catch (error) {
-        console.error('Erreur:', error);
-      }
+    if (!isAuthenticated()) {
+      router.push('/login');
     }
-
-    loadUser();
-  }, []);
+  }, [router]);
 
   return (
-    <div className="p-6 text-white">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
-      {user ? (
-        <p>Bienvenue, <strong>{user.name}</strong> !</p>
-      ) : (
-        <p>Chargement du profil...</p>
-      )}
+    <div className="p-4">
+      <h1 className="text-2xl font-bold">Tableau de bord</h1>
+      <p>Bienvenue dans votre espace personnel.</p>
     </div>
   );
 }
