@@ -8,10 +8,10 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    login = data.get('login')
+    email = data.get('email')
     password = data.get('password')
 
-    user = User.query.filter_by(login=login).first()
+    user = User.query.filter_by(email=email).first()
     if user and bcrypt.check_password_hash(user.password, password):
         access_token = create_access_token(identity=user.email)
         return jsonify({
